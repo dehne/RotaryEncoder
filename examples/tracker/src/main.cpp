@@ -47,7 +47,7 @@
 #define B_PIN     (2)                         // Pin to which the rotary encoder's "B" switch is attached
 #define S_PIN     (7)                         // Pin to which the rotary encoder's push-button is attached
 
-#define BANNER    F("\nRotary encoder library test v0.3.0")
+#define BANNER    F("\nRotary encoder position tracker example v1.0.0")
 
 RotaryEncoder re {A_PIN, B_PIN, S_PIN};       // Object encapsulating the rotary encoder on A_PIN, B_PIN, S_PIN
 
