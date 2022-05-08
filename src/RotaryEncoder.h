@@ -54,7 +54,7 @@
  * encoder in loop(). Or, alternatively, from a timer ISR, or, if your processor supportes is, using 
  * a pin-change ISR.
  *  
- * @version  Version 1.0.0, May 2022
+ * @version  Version 1.0.1, May 2022
  *
  * @author   D. L. Ehnebuske
  * 
@@ -95,7 +95,7 @@
 
     #include <Arduino.h>                                // Ritual Arduino include
 
-    #define _RE_DEBUG                                   // Uncomment to enable debug output
+    //#define _RE_DEBUG                                   // Uncomment to enable debug output
     #define RE_LONG_MILLIS      (500)                   // Default for how many millis() make for a long click
     #define RE_MIN_MILLIS       (35)                    // Default for how many millis() a click must have to be noticed
 
