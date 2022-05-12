@@ -4,7 +4,7 @@
  * This file is a part of the RotaryEncoder library package. See the file RotaryEncoder.h 
  * for details.
  * 
- * @version  Version 1.0.0, May 2022
+ * @version  Version 1.0.2, May 2022
  *  
  * @author   D. L. Ehnebuske
  * 
@@ -121,17 +121,22 @@ void RotaryEncoder::run() {
   }
 
   // Deal with push-button
-  if (sPin != 0xFF && cHandler != nullptr) {    // If there's a valid button even handler
+  if (sPin != 0xFF) {                           // If there's button switch
     bool sIsClosed = digitalRead(sPin) == LOW;
     unsigned long nowMillis = millis();
     #ifdef _RE_DEBUG
     digitalWrite(_RE_RED_LED, sIsClosed ? HIGH : LOW);
     #endif
-    if (sWasOpen && sIsClosed) {                // If button just closed
-      sMillis = nowMillis;                      //   Remember when it happened 
-    } else if (!sWasOpen && !sIsClosed && nowMillis - sMillis > sMinMillis) {       
-                                                // Otherwise if it just opened and it's not a glitch; invoke the handler
-      (*cHandler)(nowMillis - sMillis >= sLongMillis ? cLong : cShort);
+    if (sWasOpen && sIsClosed) {                //   If button just closed
+      sMillis = nowMillis;                      //     Remember when it happened 
+    } else if (!sWasOpen && !sIsClosed && nowMillis - sMillis > sMinMillis) {
+                                                //   Otherwise if it just opened and it's not a glitch
+      re_click_t cType = nowMillis - sMillis >= sLongMillis ? cLong : cShort;
+        if (cHandler != nullptr) {              //     If there's a handler, invoke it
+        (*cHandler)(cType);
+      } else {                                  //     Otherwise, just remember the type
+        click = cType;
+      }
     }
     sWasOpen = !sIsClosed;                      // Remember the latest state
   }
@@ -151,4 +156,10 @@ int16_t RotaryEncoder::getPosition() {
 
 void RotaryEncoder::setPosition(int16_t p) {
   position = p;
+}
+
+re_click_t RotaryEncoder::buttonClick() {
+  re_click_t c = click;
+  click = cNone;
+  return c;
 }

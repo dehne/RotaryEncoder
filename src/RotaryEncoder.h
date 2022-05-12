@@ -54,7 +54,7 @@
  * encoder in loop(). Or, alternatively, from a timer ISR, or, if your processor supportes is, using 
  * a pin-change ISR.
  *  
- * @version  Version 1.0.1, May 2022
+ * @version  Version 1.0.2, May 2022
  *
  * @author   D. L. Ehnebuske
  * 
@@ -99,7 +99,7 @@
     #define RE_LONG_MILLIS      (500)                   // Default for how many millis() make for a long click
     #define RE_MIN_MILLIS       (35)                    // Default for how many millis() a click must have to be noticed
 
-    enum re_click_t : uint8_t {cShort, cLong};          // Type of click; short or long.
+    enum re_click_t : uint8_t {cNone, cShort, cLong};   // Type of click; none, short or long.
     extern "C" {                                        // The type a push-button click handler must have
         typedef void (*re_on_click_handler_t)(re_click_t click);
     }
@@ -145,11 +145,17 @@
              * 
              * attachOnRotation(handler)
              *      Attach the event handler for the rotation event. The rotation event handler  
-             *      is invoked whenever the encoder's shaft is rotated on e step clockwise or 
-             *      counterclockwise. When invoked, it is passed a re_dit_t parameter specifying 
+             *      is invoked whenever the encoder's shaft is rotated one step clockwise or 
+             *      counterclockwise. When invoked, it is passed a re_dir_t parameter specifying 
              *      which direction the rotation was. The rotation is "consumed" in the sense that 
              *      the rotary encoder's position is moved one step towards 0 whenever the handler 
              *      is invoked.
+             * 
+             *      Declare the event handler this way:
+             * 
+             *          void <handlerFunctionName>(re_dir_t <dirParameterName>) {
+             *              ...
+             *          }
              * 
              ****/
             void attachOnRotation(re_on_rotate_handler_t handler);
@@ -157,17 +163,23 @@
             /****
              * 
              * attachOnButton(handler)
-             *      Attach the handler for the "switch clicked" event. The rotatio event handler 
-             *      is invoked whenever the encoder's push button has been clicked, long-clicked 
-             *      or double-clicked. When invoked, it is passed a re_click_t parameter 
-             *      specifying what type of click has happened.
+             *      Attach the handler for the switch-clicked event. The event handler is invoked 
+             *      whenever the encoder's push button has been clicked or long-clicked. When 
+             *      invoked, it is passed a re_click_t parameter specifying what type of click has 
+             *      happened.
+             * 
+             *      Declare the event handler in this way:
+             * 
+             *          void <handlerFunctionName>(re_click_t <typeParameterName>) {
+             *              ...
+             *          }
              * 
              ****/
             void attachOnButton(re_on_click_handler_t handler);
 
             /****
              * 
-             * getPosition():   
+             * getPosition():
              *      Return the current position of the rotary encoder in clicks. Positive numbers 
              *      are clockwise, negative counterclockwise.
              * 
@@ -184,12 +196,30 @@
              *      clockwise, negative counterclockwise.
              * 
              *      Caution is needed when setting the encoder's position while also using a 
-             *      rotation  handler (see attachOnRotation, above) since the handler will be 
-             *      invoked repeatedly to reduce the position back to zero. It will work just 
-             *      fine, but it's probably not what you're after.
+             *      rotation handler. (See attachOnRotation(), above.) Setting the position to a 
+             *      non-zero value will cause the handler to be invoked repeatedly to reduce the 
+             *      position back to zero. It works just fine, but it's probably not what you're 
+             *      after.
              * 
              ****/
             void setPosition(int16_t p);
+
+            /****
+             * 
+             * buttonClick()
+             *      Return re_click_t value indicating whether an unhandled click has occurred, 
+             *      and, if so, what kind it was. Invoking buttonClick() "consumes" the click.
+             * 
+             *      NB: If there is a switch-click even handler (see attachOnButton()), it has 
+             *      priority; when there is a handler, buttonClick() always returns 
+             *      re_click_t::cNone.
+             * 
+             * Returns
+             *      re_click_t value indicating whether a button click has occurred, and, if so, 
+             *      what kind it was.
+             * 
+             ****/
+            re_click_t buttonClick();
 
         private:
             uint8_t aPin;                               // The GPIO pin the encoder's A switch is attached to
@@ -205,8 +235,8 @@
             unsigned long sLongMillis;                  // How many millis() make for a long click
 
             enum re_nextsw_t : uint8_t {switchA, switchB};  
-            volatile re_nextsw_t nextSw = switchA;      // Whether the next switch to close is A or B
-            volatile int16_t position = 0;              // Net position + is clockwise; - is counterclockwise
+            re_nextsw_t nextSw = switchA;               // Whether the next switch to close is A or B
+            re_click_t click = cNone;                   // Whether and what kind of click has occurred
+            int16_t position = 0;                       // Net position + is clockwise; - is counterclockwise
     };
-
 #endif
