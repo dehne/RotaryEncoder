@@ -1,7 +1,7 @@
 # RotaryEncoder
 ## Another rotary encoder library for the Arduino
 
-This file is a part of yet another RotaryEncoder library package. It implements the class 
+This yet another rotary encoder library package. It implements the class 
 RotaryEncoder. A RotaryEncoder instance encapsulates a simple (cheap) incremental rotary 
 encoder, typically used with a clicky rotating knob as a user input device. Most often they 
 have three terminals, one referred to as A or CLK, another as B or DT. The third is GND. The 
